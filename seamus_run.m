@@ -2,6 +2,7 @@ function seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, ad
 %seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, adpoints, bdpoints, savename)
 %
 %   Sediment simulation module of D14C-enabled SEdiment AccuMUlation Simulator (SEAMUS)
+%   Version 1.0 (2019-05-27)
 %   B.C. Lougheed, 2019
 %   bryan.lougheed@geo.uu.se
 %
@@ -288,6 +289,16 @@ if exist('carrierBin','var') == 1
 	clear carrierBin
 end
 clear nforams
+
+% output is promised in m by 1 format
+depths = depths';
+depths_original = depths_original';
+cycles = cycles';
+types = types';
+ages = ages';
+foram14c = foram14c';
+foramfmc = foramfmc';
+
 
 save(savename,'-v7.3',...%'-nocompression',...
 		'depths',...

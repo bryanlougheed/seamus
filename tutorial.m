@@ -44,14 +44,14 @@ bdpoints =             [0    10
 
 % age-depth points      ka  depth (cm)
 adpoints =              [0   0
-	                    25  250
-	                    50  500]; 
+	                    25   250
+	                    50   500]; 
 % The above will result in constant SAR of 10 cm/ka.
 % You can enter as many age depth points as you like, and
 % the simulation will interpolate/extrapolate where needed.
 % You could also load an external file instead.
 
-% Species A carrier signal
+% Species A carrier signal(s)
 %                       ka        signal  
 carrierA =              [ngripage ngrip18O];
 % Here we simply use the NGRIP data that we prepared earlier.
@@ -69,6 +69,8 @@ seamus_run(simstart, siminc, simend, btinc,	fpcm, realD14C,...
 	blankbg, adpoints, bdpoints, runfile,...
 	'calcurve', calcurve,'carrierA',carrierA,'speciesA',speciesA);
 % you can add more optional inputs, see documentation
+% For full options type 'help seamus_run' into command window or consult
+% supplementary tables in manuscript.
 
 %% (4): Now prepare the input variables for the seamus_pick picking and 14C dating simulaiton
 
@@ -85,8 +87,11 @@ matfilein = runfile;          % The name of the sediment simulation to analyse (
 
 seamus_pick(matfilein, pickfile, calcurve, pickint, Apickfordate, Bpickfordate)
 % you can add more optional inputs, see documentation
+% For full options type 'help seamus_pick' into command window or consult
+% supplementary tables in manuscript.
 
-%% (6) Now we can make some figures. Let's start with a simple downcore figure showing depth vs age
+%% (6) Now we can analyse the output data and make some figures. 
+% Let's start with a simple downcore figure showing depth vs age
 
 % ---- (6a): Get some stuff to plot --------------------
 
@@ -112,7 +117,7 @@ figure(1)
 clf
 % plot a cloud of single specimen values
 plot(ages/1000,depths,'b.','markersize',1,'color',[0.8 0.8 0.8]) % divide age by 1000 to make ka (easier for the plot labels)
-% plot the median age on top
+% plot the discrete-depth median ages on top
 hold on
 plot(Adiscage/1000,discdepth,'k-','linewidth',2);
 % make the figure nicer
@@ -185,7 +190,7 @@ figure(3)
 clf
 
 subplot(1,2,1) % subplot 1
-histogram(ages/1000)
+histogram(ages/1000) % divide by 1000 to get ka
 xlabel('ka')
 ylabel('n specimens')
 
@@ -220,19 +225,17 @@ manylim = []; % manual y limits on plot (leave empty for automatic, or e.g. [3 5
 
 figure(4)
 clf
-
-[~, di] = min(abs(p.Adiscagemed-age2do)); % finds closest picked sample to desired age2do
-sliceint = mean(diff(p.discdepth)); % find the slice interval of the core
-depthinterval = [p.discdepth(di,1)-sliceint/2 p.discdepth(di,1)+sliceint/2]; % depth interval of the sample
+[~, di] = min(abs(p.Adiscagemed-age2do)); 
+sliceint = mean(diff(p.discdepth)); 
+depthinterval = [p.discdepth(di,1)-sliceint/2 p.discdepth(di,1)+sliceint/2];
 forind = find(r.depths >= depthinterval(1) & r.depths < depthinterval(2) & r.cycles <= p.Adiscwhole(di,1)); % find all whole forams in the depth interval
 AMSage = p.AdiscAMSage(di,1) - resage2use;
 AMSerr = (p.AdiscAMSerr(di,1)^2 + reserr2use^2)^0.5;
-thisAMSpdf = normpdf([AMSage-3.5*AMSerr:AMSage+3.5*AMSerr], AMSage, AMSerr); % Gaussian distribution of AMS age + AMS error with resage and reserr
+thisAMSpdf = normpdf([AMSage-3.5*AMSerr:AMSage+3.5*AMSerr], AMSage, AMSerr);
 [p95_4, p68_2, calprob, medage] = matcal(p.AdiscAMSage(di,1), p.AdiscAMSerr(di,1), 'marine13', 'calbp', 'resage', resage2use, 'reserr', reserr2use, 'plot', 0); % take AMS age and AMS error and make calibrated age distribution using MatCal + Marine13
 dgreen = [0 158 115]/255;
 lorange = [219 159 114]/255;
 
-% plot true/calibrated ages on X axis
 ages = r.ages;
 ages = ages(forind);
 axcalage = axes;
@@ -261,13 +264,12 @@ if isempty(manxlim) == 0
 	xlim(manxlim)
 end
 xlims = xlim;
-if xlims(1) < 0;
+if xlims(1) < 0
 	xlims(1) = 0;
 	xlim(xlims);
 end
 axis off
 
-% plot 14C ages in Y axis
 plotscale = 1000;
 foram14c = r.foram14c;
 foram14c = foram14c(forind);
@@ -292,13 +294,12 @@ if isempty(manylim) == 0
 	ylim(manylim)
 end
 ylims = ylim;
-if ylims(1) < 0;
+if ylims(1) < 0
 	ylims(1) = 0;
 	ylim(ylims);
 end
 axis off
 
-% plot cal curve
 axintcal = axes;
 File = fopen(['private/',curve2use,'.14c']);
 Contents = textscan(File,'%f %f %f %f %f','headerlines',11,'delimiter',',');
@@ -313,18 +314,16 @@ fill([xdata' fliplr(xdata')],[ydata'+2*onesig' fliplr(ydata'-2*onesig')],[0.8 0.
 hold on
 fill([xdata' fliplr(xdata')],[ydata'+onesig' fliplr(ydata'-onesig')],[0.6 0.6 0.6],'edgecolor','none'); % 1 sigma range
 xlim(xlims);
-ylim(ylims); % match to xlims and ylims of other plots
+ylim(ylims);
 xlabel('Cal ka BP')
 ylabel('^1^4C age (^1^4C ka BP)')
 set(gca, 'color', 'none')
 
-% text labels
-tboxstr = ['Discrete depth interval: ', num2str(round(depthinterval(1))),'-',num2str(round(depthinterval(2))), ' cm'];
+tboxstr = ['Discrete depth interval: ', num2str(depthinterval(1)),'-',num2str(depthinterval(2)), ' cm'];
 tboxf2 = annotation('textbox',get(gca,'position'),'String',tboxstr);
 set(tboxf2, 'linestyle','none')
 set(tboxf2, 'horizontalalignment','left')
 
-% clean up order of plotting
 axes(ax14cams)
 uistack(h14chist,'top')
 ylim(ylims)

@@ -2,6 +2,7 @@ function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpi
 %seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpickfordate)
 %
 %   Picking and dating module of D14C-enabled SEdiment AccuMUlation Simulator (SEAMUS)
+%   Version 1.0 (2019-05-27)
 %   B.C. Lougheed, 2019
 %   bryan.lougheed@geo.uu.se
 %
@@ -293,13 +294,13 @@ save(matfileout,'-v7.3', '-nocompression',...
 
 % Nested function octprctile
 function a = octprctile(x, p)
-y = sort(x);
-if size (y,1) == 1
-	y = y(:);
-end
-trim = 1 + (size(y,1)-1)*p(:)*0.01;
-delta = (trim - floor(trim))*ones(1,size(y,2));
-a = y(floor(trim), :) .* (1-delta) + y(ceil(trim), :) .* delta;
+	y = sort(x);
+	if size (y,1) == 1
+		y = y(:);
+	end
+	trim = 1 + (size(y,1)-1)*p(:)*0.01;
+	delta = (trim - floor(trim))*ones(1,size(y,2));
+	a = y(floor(trim), :) .* (1-delta) + y(ceil(trim), :) .* delta;
 end
 
 
