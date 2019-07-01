@@ -113,11 +113,13 @@ Aresage =  interp1(Aresage(:,1), Aresage(:,2), discdepth,'linear','extrap');
 Abroken =  interp1(Abroken(:,1), Abroken(:,2), discdepth,'linear','extrap');
 Adiscagemed = NaN(numel(discdepth),1);
 Adiscagemean = NaN(numel(discdepth),1);
+Adisc95_4 = NaN(numel(discdepth),2);
 AdiscAMSage = NaN(numel(discdepth),1);
 AdiscAMSerr = NaN(numel(discdepth),1);
 Adisc14Cage = NaN(numel(discdepth),1);
 Adisccalagemed = NaN(numel(discdepth),1);
 %Adisc14CPDF = cell(numel(depths2do),iter);
+Adisccal95_4 = cell(numel(depths2do),1);
 Adiscblank = NaN(numel(discdepth),1);
 Adiscwhole = NaN(numel(discdepth),1);
 Adisccarmean = NaN(numel(discdepth),size(carrierA,2));
@@ -128,11 +130,13 @@ Bresage =  interp1(Bresage(:,1), Bresage(:,2), discdepth,'linear','extrap');
 Bbroken =  interp1(Bbroken(:,1), Bbroken(:,2), discdepth,'linear','extrap');
 Bdiscagemed = NaN(numel(discdepth),1);
 Bdiscagemean = NaN(numel(discdepth),1);
+Bdisc95_4 = NaN(numel(discdepth),2);
 BdiscAMSage = NaN(numel(discdepth),1);
 BdiscAMSerr = NaN(numel(discdepth),1);
 Bdisc14Cage = NaN(numel(discdepth),1);
 Bdisccalagemed = NaN(numel(discdepth),1);
 %Bdisc14CPDF = cell(numel(depths2do),iter);
+Bdisccal95_4 = cell(numel(depths2do),1);
 Bdiscblank = NaN(numel(discdepth),1);
 Bdiscwhole = NaN(numel(discdepth),1);
 Bdisccarmean = NaN(numel(discdepth),size(carrierB,2));
@@ -174,7 +178,7 @@ if isempty(find(types == 0,1)) ~= 1
 			end
 		elseif Apickfordate == -1
 			ind = foramsnow;
-			if numel(ind) == 0;
+			if numel(ind) == 0
 				continue % none available, skip to next discrete depth
 			end
 		end
@@ -187,6 +191,8 @@ if isempty(find(types == 0,1)) ~= 1
 		Adiscagemean(i) = mean(ages(ind));
 		% True median age
 		Adiscagemed(i) = median(ages(ind));
+        % True 95.45 interval
+        Adisc95_4(i,1:2) = prctile(ages(ind),[100*(1-erf(2/sqrt(2)))/2 100-100*(1-erf(2/sqrt(2)))/2]);
 		% True mean 14C age
 		Adisc14Cage(i) = mean(foram14c(ind));
 		% AMS 14C age
@@ -194,7 +200,7 @@ if isempty(find(types == 0,1)) ~= 1
 		AdiscAMSage(i) = -8033*log(meanfmc); % convert to 14C years; Libby half-life
 		AdiscAMSerr(i) = interp1([1.0 exp((blankbg+1)/-8033)],[30 200],meanfmc); % typical AMS error, scaled to fmc
 		% Calibrated 14C age
-		[~, ~, ~, Adisccalagemed(i)] = matcal(AdiscAMSage(i), AdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Aresage(i),'reserr',Areserr(i));
+		[Adisccal95_4{i}, ~, ~, Adisccalagemed(i)] = matcal(AdiscAMSage(i), AdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Aresage(i),'reserr',Areserr(i));
 		
 		% carrier signals
 		if isempty(Adisccarmean) ~= 1
@@ -235,7 +241,7 @@ if isempty(find(types == 1,1)) ~= 1
 			end
 		elseif Bpickfordate == -1
 			ind = foramsnow;
-			if numel(ind) == 0;
+			if numel(ind) == 0
 				continue % none available
 			end
 		end
@@ -248,6 +254,8 @@ if isempty(find(types == 1,1)) ~= 1
 		Bdiscagemean(i) = mean(ages(ind));
 		% True median age
 		Bdiscagemed(i) = median(ages(ind));
+		% True 95.45 interval
+        Bdisc95_4(i,1:2) = prctile(ages(ind),[100*(1-erf(2/sqrt(2)))/2 100-100*(1-erf(2/sqrt(2)))/2]);
 		% True mean 14C age
 		Bdisc14Cage(i) = mean(foram14c(ind));
 		% AMS 14C age
@@ -255,7 +263,7 @@ if isempty(find(types == 1,1)) ~= 1
 		BdiscAMSage(i) = -8033*log(meanfmc); % convert to 14C years; Libby half-life
 		BdiscAMSerr(i) = interp1([1.0 exp((blankbg+1)/-8033)],[30 200],meanfmc); % typical AMS error, scaled to fmc
 		% Calibrated 14C age
-		[~, ~, ~, Bdisccalagemed(i)] = matcal(BdiscAMSage(i), BdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Bresage(i),'reserr',Breserr(i));
+		[Bdisccal95_4{i}, ~, ~, Bdisccalagemed(i)] = matcal(BdiscAMSage(i), BdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Bresage(i),'reserr',Breserr(i));
 		% carrier signals
 		if isempty(Bdisccarmean) ~= 1
 			Bdisccarmean(i,:) = mean(carrierB(ind,:),1,'omitnan');
@@ -272,20 +280,24 @@ save(matfileout,'-v7.3', '-nocompression',...
 	'discdepth',...
 	'Adiscagemed',...
 	'Adiscagemean',...
+	'Adisc95_4',...
 	'AdiscAMSage',...
 	'AdiscAMSerr',...
 	'Adisc14Cage',...
 	'Adisccalagemed',...
+	'Adisccal95_4',...
 	'Adiscblank',...
 	'Adiscwhole',...
 	'Adisccarmean',...
 	'Adiscnforam',...
 	'Bdiscagemed',...
 	'Bdiscagemean',...
+	'Bdisc95_4',...
 	'BdiscAMSage',...
 	'BdiscAMSerr',...
 	'Bdisc14Cage',...
 	'Bdisccalagemed',...
+	'Bdisccal95_4',...
 	'Bdiscblank',...
 	'Bdiscwhole',...
 	'Bdisccarmean',...

@@ -91,17 +91,17 @@ p.CaseSensitive = false;
 p.FunctionName='seamus_run';
 
 defaultspeciesA =      [ 0    1
-	                     100  1 ];
+	100  1 ];
 defaultresageA =       [ 0    0
-	                     100  0 ];
+	100  0 ];
 defaultoffsetA =       [ 0    0
-	                     100  0 ];
+	100  0 ];
 defaultspeciesB =      [ 0    0
-	                     100  0 ];
+	100  0 ];
 defaultresageB =       [ 0    0
-	                     100  0 ];
+	100  0 ];
 defaultoffsetB =       [ 0    0
-	                     100  0 ];
+	100  0 ];
 defaultcarrierA = [];
 defaultcarrierB = [];
 defaultcalcurve = 'Marine13';
@@ -168,7 +168,7 @@ if isempty(carrierB) == 0
 	clear carrierB
 end
 
-% prep core simualation output variables
+% prep core simualation single specimen output variables
 if do32bit == 0
 	ages = repelem(simsteps,nforams);
 	depths = repelem(addepths,nforams);
@@ -192,10 +192,14 @@ elseif do32bit == 1
 end
 
 % populate species types for each simstep according to abundance
-% quite fast in loop, but can probably be vectorised in future version
+% very fast in loop, but can probably be vectorised in future version
 for i = 1:length(simsteps)
+	if fspecA(i) > 0
 	types(stinds(i) : stinds(i)+round(fspecA(i)*nforams(i))-1) = 0;
-	types(stinds(i)+round(fspecA(i)*nforams(i)) : stinds(i)+round(fspecA(i)*nforams)+round(fspecB(i)*nforams(i))-1) = 1;
+	end
+	if fspecB(i) > 0
+		types(stinds(i)+round(fspecA(i)*nforams(i))  :  stinds(i)+round(fspecA(i)*nforams) + round(fspecB(i)*nforams(i))-1 ) = 1;
+	end
 end
 
 % RUN DEPTH BIOTURBATION SIMULATION
@@ -205,6 +209,7 @@ disp('Running sedimentation simulation')
 updateshow = 1:(length(btincs)-1)/10:length(btincs);
 updateshow = updateshow(2:end);
 updatedisp = 0;
+disp([num2str(round(updatedisp)),'%']);
 for i = 1:length(btincs)
 	% get corresponding simstep index
 	s = find(simsteps == btincs(i));
@@ -249,7 +254,7 @@ elseif realD14C == 1 % if including cal curve d14C
 		% Species A
 		ind = find(ages == uages(i) & types == 0);
 		if isempty(ind) ~=1 && uages(i) <= max(hicurvecal) - Aoffsets(ind(1)) % All Aoffsets of timestep are the same, so use first one
-			foram14c(ind) = hicurve14c(hicurvecal == uages(i) + Aoffsets(ind(1)) ) + resagesA(ind(1)); 
+			foram14c(ind) = hicurve14c(hicurvecal == uages(i) + Aoffsets(ind(1)) ) + resagesA(ind(1));
 		end
 		% Species B
 		ind = find(ages == uages(i) & types == 1);
@@ -301,16 +306,16 @@ foramfmc = foramfmc';
 
 
 save(savename,'-v7.3',...%'-nocompression',...
-		'depths',...
-		'depths_original',...
-		'cycles',...
-		'types',...
-		'ages',...
-		'foram14c',...
-		'foramfmc',...
-		'blankbg',...
-	    'carrierA',...
-		'carrierB');
-	
-	
+	'depths',...
+	'depths_original',...
+	'cycles',...
+	'types',...
+	'ages',...
+	'foram14c',...
+	'foramfmc',...
+	'blankbg',...
+	'carrierA',...
+	'carrierB');
+
+
 end % end seamus_run
