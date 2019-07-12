@@ -195,7 +195,7 @@ end
 % very fast in loop, but can probably be vectorised in future version
 for i = 1:length(simsteps)
 	if fspecA(i) > 0
-	types(stinds(i) : stinds(i)+round(fspecA(i)*nforams(i))-1) = 0;
+		types(stinds(i) : stinds(i)+round(fspecA(i)*nforams(i))-1) = 0;
 	end
 	if fspecB(i) > 0
 		types(stinds(i)+round(fspecA(i)*nforams(i))  :  stinds(i)+round(fspecA(i)*nforams) + round(fspecB(i)*nforams(i))-1 ) = 1;

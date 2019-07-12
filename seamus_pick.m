@@ -1,68 +1,68 @@
 function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpickfordate, varargin)
-%seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpickfordate)
-%
-%   Picking and dating module of D14C-enabled SEdiment AccuMUlation Simulator (SEAMUS)
-%   Version 1.0 (2019-05-27)
-%   B.C. Lougheed, 2019
-%   bryan.lougheed@geo.uu.se
-%
-%   This module picks specimen samples from a simulated sediment core in discrete X cm intervals,
-%   and calculates the 14C AMS ages, calibrated 14C ages and true ages for each cm.
-%   NOTE: You need 'matcal' function to be installed on your search path.
-%   Matcal can be downloaded from: https://github.com/bryanlougheed/MatCal
-%
-%   Required input:
-%   ===================
-%   matfilein      = string directing to the mat file created by seamus_run()
-%   matfileout     = string with the mat file name to save output variables to
-%   Apickfordate   = number of whole specimens per sample to pick from species A (-1 = pick all)
-%   Bpickfordate   = number of whole specimens per sample to pick from species B (-1 = pick all)
-%   calcurve       = cal curve to use for calibrating 14C dates (e.g. 'Marine13')
-%   pickint        = discrete depth slice size (cm)
-%
-%   Optional input
-%   ===================
-%   Aresage = m by 3 matrix of res age to apply to downcore dates of Species A
-%             col 1 = depth (cm), col 2 = resage (14C yr), col 3 = resageerr (14Cyr))
-%             Default is res age of zero p/m zero for all samples.
-%             e.g., 'Aresage',matrix
-%   Bresage = As for Aresage, but for Species B.
-%   Abroken = m by 2 matrix of fraction broken speicmens (won't be picked) for Species A
-%             (col 1 = depth (cm), col 2 = fraction broken (between 0 and 1)
-%             Default is res age of zero p/m zero for all samples.
-%             e.g., 'Abroken',matrix
-%   Bbroken = As for Abroken, but for Species B.
-%
-%   Output:
-%   ===================
-%   mat file with name matfileout, containing the following variables, which are all
-%   the same dimension. 
-%   
-%   The row position in each output corresponds to the same discrete depth sample (DDS).
-%
-%	discdepth      = The centre of the DDS (cm).
-%	Adiscagemed    = Species A median age for the DDS (years).
-%	Adiscagemean   = Species A mean age of the DDS (years).
-%	AdiscAMSage    = Species A predicted lab 14C age for the DDS (14C years).
-%	AdiscAMSerr    = Species A predicted lab 14C error for the DDS (14C years).
-%	Adisc14Cage    = Species A mean 14C age for the DDS (14C years).
-%	Adisccalagemed = Species A calibrated age for the DDS (cal years).
-%	Adiscblank     = If the DDS contains >0 14C blank specimens of Species A (0 = No, 1 = Yes).
-%   Adiscwhole     = Species A specimens in this DDS with cycles number < than this number are considered
-%                    as still whole.
-%   Adiscnforam    = Number of Species A specimens picked in sample. (n specimens)
-%   Adisccarmean   = Species A DDS carrier signal mean. Each column corresponds to a carrier.
-%	Bdiscagemed    = Species B median age for the DDS (years).
-%	Bdiscagemean   = Species B mean age of the DDS (years).
-%	BdiscAMSage    = Species B predicted lab 14C age for the DDS (14C years).
-%	BdiscAMSerr    = Species B predicted lab 14C error for the DDS (14C years).
-%	Bdisc14Cage    = Species B mean 14C age for the DDS (14C years).
-%	Bdisccalagemed = Species B calibrated age for the DDS (cal years).
-%	Bdiscblank     = If the DDS contains >0 14C-blank specimens of Species B (0 = No, 1 = Yes).
-%   Bdiscwhole     = Species B specimens in this DDS with cycles number < than this number are considered
-%                    as still whole.
-%   Bdisccarmean   = Species B DDS carrier signal mean. Each column corresponds to a carrier.
-%   Bdiscnforam    = Number of Species B specimens picked in sample B. (n specimens)
+% seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpickfordate)
+% 
+% Picking and dating module of D14C-enabled SEdiment AccuMUlation Simulator (SEAMUS)
+% Version 1.0 (2019-05-27)
+% B.C. Lougheed, 2019
+% bryan.lougheed@geo.uu.se
+% 
+% This module picks specimen samples from a simulated sediment core in discrete X cm intervals,
+% and calculates the 14C AMS ages, calibrated 14C ages and true ages for each cm.
+% NOTE: You need 'matcal' function to be installed on your search path.
+% Matcal can be downloaded from: https://github.com/bryanlougheed/MatCal
+% 
+% Required input:
+% ===================
+% matfilein      = string directing to the mat file created by seamus_run()
+% matfileout     = string with the mat file name to save output variables to
+% Apickfordate   = number of whole specimens per sample to pick from species A (-1 = pick all)
+% Bpickfordate   = number of whole specimens per sample to pick from species B (-1 = pick all)
+% calcurve       = cal curve to use for calibrating 14C dates (e.g. 'Marine13')
+% pickint        = discrete depth slice size (cm)
+% 
+% Optional input
+% ===================
+% Aresage = m by 3 matrix of res age to apply to downcore dates of Species A
+% col 1 = depth (cm), col 2 = resage (14C yr), col 3 = resageerr (14Cyr))
+% Default is res age of zero p/m zero for all samples.
+% e.g., 'Aresage',matrix
+% Bresage = As for Aresage, but for Species B.
+% Abroken = m by 2 matrix of fraction broken speicmens (won't be picked) for Species A
+% (col 1 = depth (cm), col 2 = fraction broken (between 0 and 1)
+% Default is res age of zero p/m zero for all samples.
+% e.g., 'Abroken',matrix
+% Bbroken = As for Abroken, but for Species B.
+% 		
+% Output:
+% ===================
+% mat file with name matfileout, containing the following variables, which are all
+% the same dimension.
+% 		
+% The row position in each output corresponds to the same picked discrete depth sample (DDS).
+% 	
+% discdepth      = The centre of the DDS (cm).
+% Adiscagemed    = Species A median age for the DDS (years).
+% Adiscagemean   = Species A mean age of the DDS (years).
+% AdiscAMSage    = Species A predicted lab 14C age for the DDS (14C years).
+% AdiscAMSerr    = Species A predicted lab 14C error for the DDS (14C years).
+% Adisc14Cage    = Species A mean 14C age for the DDS (14C years).
+% Adisccalagemed = Species A calibrated age for the DDS (cal years).
+% Adiscblank     = Species A number of 14C blank forams (n specimens).
+% Adiscwhole	   = Species A specimens in this DDS with cycles number < than this number are considered
+% 				 as still whole and were picked for sample.
+% Adiscnforam    = Number of whole Species A specimens picked in DDS sample. (n specimens)
+% Adisccarmean   = Species A DDS carrier signal mean. Each column corresponds to a carrier.
+% Bdiscagemed    = Species B median age for the DDS (years).
+% Bdiscagemean   = Species B mean age of the DDS (years).
+% BdiscAMSage    = Species B predicted lab 14C age for the DDS (14C years).
+% BdiscAMSerr    = Species B predicted lab 14C error for the DDS (14C years).
+% Bdisc14Cage    = Species B mean 14C age for the DDS (14C years).
+% Bdisccalagemed = Species B calibrated age for the DDS (cal years).
+% Bdiscblank     = Species A number of 14C blank forams in DDS(n specimens).
+% Bdiscwhole     = Species B specimens in this DDS with cycles number < than this number are considered
+% 	        	 as still whole and were picked for sample.
+% Bdisccarmean   = Species B DDS carrier signal mean. Each column corresponds to a carrier.
+% Bdiscnforam    = Number of whole Species B specimens picked in DDS sample. (n specimens)
 
 % Optional parameters input parser (parse varargin)
 p = inputParser;
@@ -186,7 +186,7 @@ if isempty(find(types == 0,1)) ~= 1
 		% number of forams
 		Adiscnforam(i) = numel(ind);
 		% number of 14C blank forams in the sample
-		Adiscblank(i) = numel(find(foram14c(ind) >= blankbg,1));
+		Adiscblank(i) = numel(find(foram14c(ind) >= blankbg));
 		% True mean age
 		Adiscagemean(i) = mean(ages(ind));
 		% True median age
@@ -249,7 +249,7 @@ if isempty(find(types == 1,1)) ~= 1
 		% number of forams
 		Bdiscnforam(i) = numel(ind);
 		% number of 14C blank forams in the sample
-		Bdiscblank(i) = numel(find(foram14c(ind) >= blankbg,1));
+		Bdiscblank(i) = numel(find(foram14c(ind) >= blankbg));
 		% True mean age
 		Bdiscagemean(i) = mean(ages(ind));
 		% True median age
