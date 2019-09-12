@@ -8,8 +8,6 @@ function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpi
 % 
 % This module picks specimen samples from a simulated sediment core in discrete X cm intervals,
 % and calculates the 14C AMS ages, calibrated 14C ages and true ages for each cm.
-% NOTE: You need 'matcal' function to be installed on your search path.
-% Matcal can be downloaded from: https://github.com/bryanlougheed/MatCal
 % 
 % Required input:
 % ===================
@@ -52,6 +50,7 @@ function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpi
 % 				 as still whole and were picked for sample.
 % Adiscnforam    = Number of whole Species A specimens picked in DDS sample. (n specimens)
 % Adisccarmean   = Species A DDS carrier signal mean. Each column corresponds to a carrier.
+% Adisccarsdev   = Species A DDS carrier signal stdev. Each column corresponds to a carrier.
 % Bdiscagemed    = Species B median age for the DDS (years).
 % Bdiscagemean   = Species B mean age of the DDS (years).
 % BdiscAMSage    = Species B predicted lab 14C age for the DDS (14C years).
@@ -61,8 +60,9 @@ function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpi
 % Bdiscblank     = Species A number of 14C blank forams in DDS(n specimens).
 % Bdiscwhole     = Species B specimens in this DDS with cycles number < than this number are considered
 % 	        	 as still whole and were picked for sample.
-% Bdisccarmean   = Species B DDS carrier signal mean. Each column corresponds to a carrier.
 % Bdiscnforam    = Number of whole Species B specimens picked in DDS sample. (n specimens)
+% Bdisccarmean   = Species B DDS carrier signal mean. Each column corresponds to a carrier.
+% Bdisccarsdev   = Species B DDS carrier signal stdev. Each column corresponds to a carrier.
 
 % Optional parameters input parser (parse varargin)
 p = inputParser;
@@ -123,6 +123,7 @@ Adisccal95_4 = cell(numel(depths2do),1);
 Adiscblank = NaN(numel(discdepth),1);
 Adiscwhole = NaN(numel(discdepth),1);
 Adisccarmean = NaN(numel(discdepth),size(carrierA,2));
+Adisccarsdev = NaN(numel(discdepth),size(carrierA,2));
 Adiscnforam = zeros(numel(discdepth),1);
 
 Breserr =  interp1(Bresage(:,1), Bresage(:,3), discdepth,'linear','extrap'); % has to come first, because reusing var name
@@ -140,6 +141,7 @@ Bdisccal95_4 = cell(numel(depths2do),1);
 Bdiscblank = NaN(numel(discdepth),1);
 Bdiscwhole = NaN(numel(discdepth),1);
 Bdisccarmean = NaN(numel(discdepth),size(carrierB,2));
+Bdisccarsdev = NaN(numel(discdepth),size(carrierB,2));
 Bdiscnforam = zeros(numel(discdepth),1);
 
 warning('off')
@@ -200,11 +202,12 @@ if isempty(find(types == 0,1)) ~= 1
 		AdiscAMSage(i) = -8033*log(meanfmc); % convert to 14C years; Libby half-life
 		AdiscAMSerr(i) = interp1([1.0 exp((blankbg+1)/-8033)],[30 200],meanfmc); % typical AMS error, scaled to fmc
 		% Calibrated 14C age
-		[Adisccal95_4{i}, ~, ~, Adisccalagemed(i)] = matcal(AdiscAMSage(i), AdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Aresage(i),'reserr',Areserr(i));
+		[Adisccal95_4{i}, ~, ~, Adisccalagemed(i)] = seamus_matcal(AdiscAMSage(i), AdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Aresage(i),'reserr',Areserr(i));
 		
 		% carrier signals
 		if isempty(Adisccarmean) ~= 1
 			Adisccarmean(i,:) = mean(carrierA(ind,:),1,'omitnan');
+			Adisccarsdev(i,:) = std(carrierA(ind,:),1,'omitnan');
 		end
 	end
 end
@@ -263,10 +266,11 @@ if isempty(find(types == 1,1)) ~= 1
 		BdiscAMSage(i) = -8033*log(meanfmc); % convert to 14C years; Libby half-life
 		BdiscAMSerr(i) = interp1([1.0 exp((blankbg+1)/-8033)],[30 200],meanfmc); % typical AMS error, scaled to fmc
 		% Calibrated 14C age
-		[Bdisccal95_4{i}, ~, ~, Bdisccalagemed(i)] = matcal(BdiscAMSage(i), BdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Bresage(i),'reserr',Breserr(i));
+		[Bdisccal95_4{i}, ~, ~, Bdisccalagemed(i)] = seamus_matcal(BdiscAMSage(i), BdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Bresage(i),'reserr',Breserr(i));
 		% carrier signals
 		if isempty(Bdisccarmean) ~= 1
 			Bdisccarmean(i,:) = mean(carrierB(ind,:),1,'omitnan');
+			Bdisccarsdev(i,:) = std(carrierB(ind,:),1,'omitnan');
 		end
 	end
 end
@@ -289,6 +293,7 @@ save(matfileout,'-v7.3', '-nocompression',...
 	'Adiscblank',...
 	'Adiscwhole',...
 	'Adisccarmean',...
+	'Adisccarsdev',...
 	'Adiscnforam',...
 	'Bdiscagemed',...
 	'Bdiscagemean',...
@@ -301,6 +306,7 @@ save(matfileout,'-v7.3', '-nocompression',...
 	'Bdiscblank',...
 	'Bdiscwhole',...
 	'Bdisccarmean',...
+	'Bdisccarsdev',...
     'Bdiscnforam');
 
 

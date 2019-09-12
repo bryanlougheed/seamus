@@ -1,4 +1,4 @@
-function  [p95_4, p68_2, calprob, medage] = matcal(c14age, c14err, calcurve, yeartype, varargin)
+function  [p95_4, p68_2, calprob, medage] = seamus_matcal(c14age, c14err, calcurve, yeartype, varargin)
 % [p95_4, p68_2, calprob, medage] = matcal(c14age, c14err, calcurve, yeartype)
 %
 % Function for 14C age calibration using Bayesian higher posterior
@@ -79,17 +79,17 @@ function  [p95_4, p68_2, calprob, medage] = matcal(c14age, c14err, calcurve, yea
 % --- Functional examples ---
 %
 % [p95_4, p68_2, prob, medage] = matcal(1175, 30, 'IntCal13', 'BCE/CE');
-% Calibrate a 14C age of 1175 ±30 14C yr BP using IntCal13 with output in BCE/CE.
+% Calibrate a 14C age of 1175 ï¿½30 14C yr BP using IntCal13 with output in BCE/CE.
 %
 %
 % [p95_4, p68_2, prob, medage] = matcal(23175, 60, 'Marine13', 'CalBP',...
 % 'resage', -50, 'reserr', 100, 'saveplot', 1);
-% Calibrate a 14C age of 23175 ±60 14C yr BP using Marine13, with output in
-% Cal BP, with delta-R of -50 ±100 14C yr and save a copy of the plot to
+% Calibrate a 14C age of 23175 ï¿½60 14C yr BP using Marine13, with output in
+% Cal BP, with delta-R of -50 ï¿½100 14C yr and save a copy of the plot to
 % your working directory as an Adobe PDF.
 %
 % [p95_4, p68_2, prob, medage] = matcal(1175, 30, 'IntCal13', 'CalBP', 'plot', 0);
-% Calibrate a 14C age of 1175±50 14C yr BP using IntCal13, with output in
+% Calibrate a 14C age of 1175ï¿½50 14C yr BP using IntCal13, with output in
 % Cal BP and disable the plot window.
 %
 % ------------

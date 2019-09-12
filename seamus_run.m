@@ -238,41 +238,28 @@ elseif realD14C == 1 % if including cal curve d14C
 	fclose(File);
 	curvecal = flipud(Contents{1});
 	curve14c = flipud(Contents{2});
+	clear Contents
 	%curved14c = flipud(Contents{4}); % not required
 	if do32bit == 0
-		foram14c = 70000*ones(size(ages)); % super blank, replaced with chosen blank later
+		foram14c = NaN(size(ages));
 	elseif do32bit == 1
-		foram14c = single(70000*ones(size(ages)));
+		foram14c = single(NaN(size(ages)));
 	end
-	hicurvecal = curvecal(1):siminc:curvecal(end);
-	hicurve14c = interp1(curvecal, curve14c, hicurvecal);
-	uages = unique(ages);
-	updateshow = 1:(length(uages)-1)/10:length(uages);
-	updateshow = updateshow(2:end);
-	updatedisp = 0;
-	for i = 1:length(uages)
-		% Species A
-		ind = find(ages == uages(i) & types == 0);
-		if isempty(ind) ~=1 && uages(i) <= max(hicurvecal) - Aoffsets(ind(1)) % All Aoffsets of timestep are the same, so use first one
-			foram14c(ind) = hicurve14c(hicurvecal == uages(i) + Aoffsets(ind(1)) ) + resagesA(ind(1));
-		end
-		% Species B
-		ind = find(ages == uages(i) & types == 1);
-		if isempty(ind) ~=1 && uages(i) <= max(hicurvecal) - Boffsets(ind(1)) % ditto
-			foram14c(ind) = hicurve14c(hicurvecal == uages(i) + Boffsets(ind(1)) ) + resagesB(ind(1));
-		end
-		
-		if uages(i) > max(hicurvecal)
-			disp('100%')
-			break
-		end
-		
-		if ismember(i,updateshow) == 1
-			updatedisp = updatedisp + 10;
-			disp([num2str(round(updatedisp)),'%']);
-		end
-	end
-	foramfmc = exp(foram14c/-8033); % convert IntCal 14C age to activity (use Libby half-life)
+	hicurve14c = interp1(curvecal, curve14c, ages);
+	foram14c = NaN(size(ages));
+	% Species A
+	ind = find(types == 0);
+	foram14c(ind) = hicurve14c(ages(ind) == ages(ind) + Aoffsets(ind)) + resagesA(ind);
+	% Species B
+	ind = find(types == 1);
+	foram14c(ind) = hicurve14c(ages(ind) == ages(ind) + Boffsets(ind)) + resagesB(ind);
+	% Use blank value for forams older (and younger) than cal curve
+	foram14c(isnan(foram14c)) = blankbg;
+	% NaN value for forams younger than cal curve
+	foram14c((ages + Aoffsets) < min(curvecal) & types == 0) = NaN;
+	foram14c((ages + Boffsets) < min(curvecal) & types == 1) = NaN;
+	% convert all to activity using Libby half-life	
+	foramfmc = exp(foram14c/-8033);
 end
 clear hicurvecal hicurve14c % free up some memory
 blankbgfmc = exp(blankbg/-8033); % convert chosen 14C age blank to activity blank (use Libby half-life)
@@ -304,7 +291,6 @@ ages = ages';
 foram14c = foram14c';
 foramfmc = foramfmc';
 
-
 save(savename,'-v7.3',...%'-nocompression',...
 	'depths',...
 	'depths_original',...
@@ -316,6 +302,5 @@ save(savename,'-v7.3',...%'-nocompression',...
 	'blankbg',...
 	'carrierA',...
 	'carrierB');
-
 
 end % end seamus_run
