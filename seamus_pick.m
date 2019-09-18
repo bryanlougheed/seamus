@@ -207,7 +207,7 @@ if isempty(find(types == 0,1)) ~= 1
 		% carrier signals
 		if isempty(Adisccarmean) ~= 1
 			Adisccarmean(i,:) = mean(carrierA(ind,:),1,'omitnan');
-			Adisccarsdev(i,:) = std(carrierA(ind,:),1,'omitnan');
+			Adisccarsdev(i,:) = std(carrierA(ind,:),0,1,'omitnan');
 		end
 	end
 end
@@ -270,7 +270,7 @@ if isempty(find(types == 1,1)) ~= 1
 		% carrier signals
 		if isempty(Bdisccarmean) ~= 1
 			Bdisccarmean(i,:) = mean(carrierB(ind,:),1,'omitnan');
-			Bdisccarsdev(i,:) = std(carrierB(ind,:),1,'omitnan');
+			Bdisccarsdev(i,:) = std(carrierB(ind,:),0,1,'omitnan');
 		end
 	end
 end
