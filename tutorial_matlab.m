@@ -27,15 +27,15 @@ btinc = 10;                % bioturbation timestep (yrs).
 realD14C = 1;              % Assign 'real' D14C to single specimens (1 = yes, 0 = no)
 calcurve = 'Marine13';     % Calibration curve to use for assigning 'real' D14C
 blankbg = 46806;           % the 14C blank value to assign to single specimens (46806 = higest value in Marine13 = practical blank)
-fpcm = 10^3;               % Core capacity in specimens per cm. Let's use 10^3 for now to run quickly (you can change later).
+fpcm = 10^2;               % Core capacity in specimens per cm. Let's use 10^3 for now to run quickly (you can change later).
 runfile = 'test_run.mat';  % Name of output file from seamus_run
 
 % (2b): Dynamic inputs for seamus_run --------------------
 
 % bioturbation depths   ka   BD (cm)
-bdpoints =             [0    10
-	                    50   10
-	                    100  10];
+bdpoints =				[0    10
+						50   10
+						100  10];
 % The above will result in a constant bioturbation depth
 % of 10 cm. You can enter dynamic values by adding extra rows
 % to the matrix and the simulation will interpolate/extrapolate
@@ -43,31 +43,33 @@ bdpoints =             [0    10
 
 
 % age-depth points      ka  depth (cm)
-adpoints =              [0   0
-	                    25   250
-	                    50   500]; 
+adpoints =				[0   0
+						25   250
+						50   500];
 % The above will result in constant SAR of 10 cm/ka.
 % You can enter as many age depth points as you like, and
 % the simulation will interpolate/extrapolate where needed.
 % You could also load an external file instead.
 
 % Species A carrier signal(s)
-%                       ka        signal  
+%                       ka        signal
 carrierA =              [ngripage ngrip18O];
 % Here we simply use the NGRIP data that we prepared earlier.
 % For carrier signals, the simulation will interpolate, but
 % not extrapolate.
 
 % Species A abundance   ka     fraction of specimen flux
-speciesA =             [0      1
-	                    25     1
+speciesA =				[0      1
+						25     1
 						50     1];
 
-%% (3): Run the seamus_run sediment simulation (can take some time)			
-
-seamus_run(simstart, siminc, simend, btinc,	fpcm, realD14C,... 
+%% (3): Run the seamus_run sediment simulation (can take some time)
+tic
+seamus_run(simstart, siminc, simend, btinc,	fpcm, realD14C,...
 	blankbg, adpoints, bdpoints, runfile,...
 	'calcurve', calcurve,'carrierA',carrierA,'speciesA',speciesA);
+toc
+
 % you can add more optional inputs, see documentation
 % For full options type 'help seamus_run' into command window or consult
 % supplementary tables in manuscript.
@@ -85,12 +87,14 @@ matfilein = runfile;          % The name of the sediment simulation to analyse (
 
 %% (5): Now run the seamus_pick picking and 14C dating simulation (can take some time)
 
+tic
 seamus_pick(matfilein, pickfile, calcurve, pickint, Apickfordate, Bpickfordate)
+toc
 % you can add more optional inputs, see documentation
 % For full options type 'help seamus_pick' into command window or consult
 % supplementary tables in manuscript.
 
-%% (6) Now we can analyse the output data and make some figures. 
+%% (6) Now we can analyse the output data and make some figures.
 % Let's start with a simple downcore figure showing depth vs age
 
 % ---- (6a): Get some stuff to plot --------------------
@@ -225,8 +229,8 @@ manylim = []; % manual y limits on plot (leave empty for automatic, or e.g. [3 5
 
 figure(4)
 clf
-[~, di] = min(abs(p.Adiscagemed-age2do)); 
-sliceint = mean(diff(p.discdepth)); 
+[~, di] = min(abs(p.Adiscagemed-age2do));
+sliceint = mean(diff(p.discdepth));
 depthinterval = [p.discdepth(di,1)-sliceint/2 p.discdepth(di,1)+sliceint/2];
 forind = find(r.depths >= depthinterval(1) & r.depths < depthinterval(2) & r.cycles <= p.Adiscwhole(di,1)); % find all whole forams in the depth interval
 AMSage = p.AdiscAMSage(di,1) - resage2use;

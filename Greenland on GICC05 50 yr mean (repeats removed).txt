@@ -1,6 +1,6 @@
 %	"NGRIP, GRIP and GISP2 ?18O and calcium concentration in 50 yrs means on the GICC05modelext timescale"
 %
-%   Please note that this file has been modified for the SEAMUS tutorial.m file by Bryan Lougheed (duplicate measurements averaged)
+%   Please note that this file has been modified for the SEAMUS tutorial by Bryan Lougheed (duplicate measurements averaged)
 %   This file is, therefore, only meant for demonstration purposes for the SEAMUS tutorial and not to be used for research.
 %   For the original data, please consult the original excel file by the original authors, which you can download from here: http://www.iceandclimate.nbi.ku.dk/data/
 %
