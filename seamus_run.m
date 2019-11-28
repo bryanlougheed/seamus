@@ -2,7 +2,7 @@ function seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, ad
 %seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, adpoints, bdpoints, savename)
 %
 %   Sediment simulation module of D14C-enabled SEdiment AccuMUlation Simulator (SEAMUS)
-%   Version 1.021 (2019-09-22)
+%   Version 1.15 (2019-11-23))
 %   B.C. Lougheed, 2019
 %   bryan.lougheed@geo.uu.se
 %
@@ -275,10 +275,12 @@ end
 if exist('carrierAin','var') == 1
 	carrierA = repelem(carrierAin,nforams,1);
 	clear carrierAin
+	%carrierA(types ~= 0,:) = NaN;
 end
 if exist('carrierBin','var') == 1
 	carrierB = repelem(carrierBin,nforams,1);
 	clear carrierBin
+	%carrierB(types ~= 1,:) = NaN;
 end
 clear nforams
 

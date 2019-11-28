@@ -2,7 +2,7 @@ function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpi
 % seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpickfordate)
 % 
 % Picking and dating module of D14C-enabled SEdiment AccuMUlation Simulator (SEAMUS)
-% Version 1.022 (2019-09-22)
+% Version 1.15 (2019-11-23)
 % B.C. Lougheed, 2019
 % bryan.lougheed@geo.uu.se
 % 
@@ -20,15 +20,22 @@ function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpi
 % 
 % Optional input
 % ===================
+% blankerror = AMS measurement error for 14C age one year younger than
+% blank (in 14C yr). Integer. Default is 200.
+% e.g. 'blankerror', 350
+%
 % Aresage = m by 3 matrix of res age to apply to downcore dates of Species A
 % col 1 = depth (cm), col 2 = resage (14C yr), col 3 = resageerr (14Cyr))
 % Default is res age of zero p/m zero for all samples.
 % e.g., 'Aresage',matrix
+%
 % Bresage = As for Aresage, but for Species B.
+%
 % Abroken = m by 2 matrix of fraction broken speicmens (won't be picked) for Species A
 % (col 1 = depth (cm), col 2 = fraction broken (between 0 and 1)
 % Default is res age of zero p/m zero for all samples.
 % e.g., 'Abroken',matrix
+%
 % Bbroken = As for Abroken, but for Species B.
 % 		
 % Output:
@@ -70,6 +77,8 @@ p.KeepUnmatched = true;
 p.CaseSensitive = false;
 p.FunctionName='seamus_pick';
 
+defaultblankerror = 200;
+
 defaultAresage =      [ 0    0  0
 	                    100  0  0];
 defaultBresage =      [ 0    0  0
@@ -80,16 +89,18 @@ defaultAbroken =      [ 0    0
 defaultBbroken =      [ 0    0
 	                    100  0];
 
+addParameter(p,'blankerror',defaultblankerror,@isnumeric);
 addParameter(p,'Aresage',defaultAresage,@isnumeric);
 addParameter(p,'Bresage',defaultBresage,@isnumeric);
 addParameter(p,'Abroken',defaultAbroken,@isnumeric);
-addParameter(p,'Bbroken',defaultBbroken,@isnumeric);
+addParameter(p,'Bbroken',defaultBbroken,@isnumeric)
 
 parse(p,varargin{:});
 Aresage = p.Results.Aresage;
 Bresage = p.Results.Bresage;
 Abroken = p.Results.Abroken;
 Bbroken = p.Results.Bbroken;
+blankerror = p.Results.blankerror;
 
 % load needed variables from simulation matfile
 % m = matfile(matfilein);  % matfile not yet octave compatible
@@ -202,7 +213,7 @@ if isempty(find(types == 0,1)) ~= 1
 		% AMS 14C age
 		meanfmc = mean(foramfmc(ind));
 		AdiscAMSage(i) = -8033*log(meanfmc); % convert to 14C years; Libby half-life
-		AdiscAMSerr(i) = interp1([1.0 exp((blankbg+1)/-8033)],[30 200],meanfmc); % typical AMS error, scaled to fmc
+		AdiscAMSerr(i) = interp1([1.0 exp((blankbg+1)/-8033)],[30 blankerror],meanfmc); % typical AMS error, scaled to fmc
 		% Calibrated 14C age
 		[Adisccal95_4{i}, ~, ~, Adisccalagemed(i)] = seamus_matcal(AdiscAMSage(i), AdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Aresage(i),'reserr',Areserr(i));
 		% carrier signals
@@ -270,7 +281,7 @@ if isempty(find(types == 1,1)) ~= 1
 		% AMS 14C age
 		meanfmc = mean(foramfmc(ind));
 		BdiscAMSage(i) = -8033*log(meanfmc); % convert to 14C years; Libby half-life
-		BdiscAMSerr(i) = interp1([1.0 exp((blankbg+1)/-8033)],[30 200],meanfmc); % typical AMS error, scaled to fmc
+		BdiscAMSerr(i) = interp1([1.0 exp((blankbg-1)/-8033)],[30 blankerror],meanfmc); % typical AMS error, scaled to fmc
 		% Calibrated 14C age
 		[Bdisccal95_4{i}, ~, ~, Bdisccalagemed(i)] = seamus_matcal(BdiscAMSage(i), BdiscAMSerr(i), calcurve, 'CalBP','plot',0,'resage',Bresage(i),'reserr',Breserr(i));
 		% carrier signals
