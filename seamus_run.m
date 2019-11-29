@@ -2,7 +2,7 @@ function seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, ad
 %seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, adpoints, bdpoints, savename)
 %
 %   Sediment simulation module of D14C-enabled SEdiment AccuMUlation Simulator (SEAMUS)
-%   Version 1.15 (2019-11-23))
+%   Version 1.20 (2019-11-29))
 %   B.C. Lougheed, 2019
 %   bryan.lougheed@geo.uu.se
 %
