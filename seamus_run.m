@@ -45,7 +45,7 @@ function seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, ad
 %                e.g., 'resageA', MATRIX
 %
 %   'offsetA'  = Temporal cal age offset from cal curve for Species A. n by 2 matrix.
-%                Col 1 = age ka, Col 2 = age offset in years.
+%                Col 1 = age ka, Col 2 = age offset in years. NOTE: Must be a multiple of siminc.
 %                e.g., 'offsetA', MATRIX
 %                Default is constant offset of 0.
 %
@@ -231,8 +231,8 @@ clear addepths biodepths simsteps % free up some memory
 % ASSIGN A 14C ACTIVITY TO EACH FORAM
 disp('Calculating 14C ages of single specimens')
 if realD14C == 0 % if assuming constant d14C, convert real years directly to activity (use real half-life)
-	foramfmc(types == 0) = exp([ages(types == 0)+Aoffsets(types == 0)-resagesA(types == 0)]/-8267);
-	foramfmc(types == 1) = exp([ages(types == 1)+Boffsets(types == 1)-resagesB(types == 1)]/-8267);
+	foramfmc(types == 0) = exp([ages(types == 0)+Aoffsets(types == 0)+resagesA(types == 0)]/-8267);
+	foramfmc(types == 1) = exp([ages(types == 1)+Boffsets(types == 1)+resagesB(types == 1)]/-8267);
 elseif realD14C == 1 % if including cal curve d14C
 	File = fopen([calcurve,'.14c']);
 	Contents = textscan(File,'%f %f %f %f %f','headerlines',11,'delimiter',',');
@@ -246,22 +246,17 @@ elseif realD14C == 1 % if including cal curve d14C
 	elseif do32bit == 1
 		foram14c = single(NaN(size(ages)));
 	end
-	hicurve14c = interp1(curvecal, curve14c, ages);
 	% Species A
 	ind = find(types == 0);
-	foram14c(ind) = hicurve14c(ages(ind) == ages(ind) + Aoffsets(ind)) + resagesA(ind);
+	foram14c(ind) = interp1(curvecal, curve14c, ages(ind)+Aoffsets(ind))  +  resagesA(ind);
 	% Species B
 	ind = find(types == 1);
-	foram14c(ind) = hicurve14c(ages(ind) == ages(ind) + Boffsets(ind)) + resagesB(ind);
-	% Use blank value for forams older (and younger) than cal curve
-	foram14c(isnan(foram14c)) = blankbg;
-	% NaN value for forams younger than cal curve
-	foram14c((ages + Aoffsets) < min(curvecal) & types == 0) = NaN;
-	foram14c((ages + Boffsets) < min(curvecal) & types == 1) = NaN;
-	% convert all to activity using Libby half-life	
+	foram14c(ind) = interp1(curvecal, curve14c, ages(ind)+Boffsets(ind))  +  resagesB(ind);
+	% forams older than oldest cal age in cal curve get temporarily 14C super-blanked
+	foram14c(ages > max(curvecal) & ~isnan(types)) = 1000000;	
+	% convert all from 14C yrs to activity using Libby half-life	
 	foramfmc = exp(foram14c/-8033);
 end
-clear hicurvecal hicurve14c % free up some memory
 blankbgfmc = exp(blankbg/-8033); % convert chosen 14C age blank to activity blank (use Libby half-life)
 foramfmc(foramfmc<blankbgfmc) = blankbgfmc; % include background on all forams
 foram14c = -8033*log(foramfmc); % calculate 14C age for each foram (Libby half-life)
