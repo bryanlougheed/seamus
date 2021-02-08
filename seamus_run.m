@@ -150,7 +150,7 @@ sedrates = diff(addepths) ./ diff(simsteps);
 sedrates = [sedrates(1) sedrates];
 nforams = round(fpcm ./ ((1./sedrates./siminc))); % nforams per timestep (scaled to sedrate and core capacity)
 	
-clear sedrates % no longer needed, free up memory
+clear sedrates % no longer needed, free cup memory
 stinds = cumsum(nforams) - nforams + 1; % startindex for each timestep
 if isempty(carrierA) == 0
 	carrierAin = NaN(numel(simsteps),size(carrierA,2)-1);

@@ -203,6 +203,10 @@ elseif strcmpi(calcurve, 'IntCal13pCO2') == 1
 	calcurve = 'IntCal13pCO2';
 	cite = '(Reimer et al., 2013 + Galbraith et al. (2015) pCO2 effect)';
 	curvetype = 'atm';
+elseif strcmpi(calcurve, 'perfectcal') == 1
+	calcurve = 'perfectcal';
+	cite = 'somebody';
+	curvetype = 'mar';
 else
 	error(['Calibration curve "',calcurve,'" unknown. Please specify a valid calibration curve (see help for options)'])
 end
