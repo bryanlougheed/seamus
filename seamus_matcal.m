@@ -232,6 +232,17 @@ elseif strcmpi(calcurve, 'Marine98') == 1
 	calcurve = 'Marine98';
 	cite = '(Stuiver et al., 1998)';
 	curvetype = 'mar';
+<<<<<<< HEAD
+=======
+elseif strcmpi(calcurve, 'IntCal13pCO2') == 1
+	calcurve = 'IntCal13pCO2';
+	cite = '(Reimer et al., 2013 + Galbraith et al. (2015) pCO2 effect)';
+	curvetype = 'atm';
+elseif strcmpi(calcurve, 'perfectcal') == 1
+	calcurve = 'perfectcal';
+	cite = 'somebody';
+	curvetype = 'mar';
+>>>>>>> c5a617f1ac4338e1b0100b57d8b3ac5132d8a8ef
 else
 	error(['Calibration curve "',calcurve,'" unknown. Please specify a valid calibration curve (see help for options)'])
 end
