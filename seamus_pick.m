@@ -15,7 +15,7 @@ function seamus_pick(matfilein, matfileout, calcurve, pickint, Apickfordate, Bpi
 % matfileout     = string with the mat file name to save output variables to
 % Apickfordate   = number of whole specimens per sample to pick from species A (-1 = pick all)
 % Bpickfordate   = number of whole specimens per sample to pick from species B (-1 = pick all)
-% calcurve       = cal curve to use for calibrating 14C dates (e.g. 'Marine13')
+% calcurve       = cal curve to use for calibrating 14C dates (e.g. 'Marine20')
 % pickint        = discrete depth slice size (cm)
 % 
 % Optional input
@@ -118,7 +118,7 @@ AMSerror = p.Results.AMSerror;
 load(matfilein, 'depths','cycles','types','foram14c','foramfmc','ages','blankbg','carrierA','carrierB') %octave compatible
 
 fromdepth = (round(min(depths/10))*10);
-todepth = (round(max(depths/10))*10)-10;
+todepth = (round(max(depths/10))*10);
 depths2do = [fromdepth:pickint:todepth]';
 discdepth = (depths2do + depths2do+pickint)/2;
 
@@ -133,8 +133,8 @@ AdiscAMSerr = NaN(numel(discdepth),1);
 Adisc14Cage = NaN(numel(discdepth),1);
 Adisccalagemed = NaN(numel(discdepth),1);
 %Adisc14CPDF = cell(numel(depths2do),iter);
-Adisccal68_2 = cell(numel(depths2do),1);
-Adisccal95_4 = cell(numel(depths2do),1);
+Adisccal68_2 = cell(numel(discdepth),1);
+Adisccal95_4 = cell(numel(discdepth),1);
 Adiscblank = NaN(numel(discdepth),1);
 Adiscwhole = NaN(numel(discdepth),1);
 Adisccarmean = NaN(numel(discdepth),size(carrierA,2));
@@ -152,8 +152,8 @@ BdiscAMSerr = NaN(numel(discdepth),1);
 Bdisc14Cage = NaN(numel(discdepth),1);
 Bdisccalagemed = NaN(numel(discdepth),1);
 %Bdisc14CPDF = cell(numel(depths2do),iter);
-Bdisccal68_2 = cell(numel(depths2do),1);
-Bdisccal95_4 = cell(numel(depths2do),1);
+Bdisccal68_2 = cell(numel(discdepth),1);
+Bdisccal95_4 = cell(numel(discdepth),1);
 Bdiscblank = NaN(numel(discdepth),1);
 Bdiscwhole = NaN(numel(discdepth),1);
 Bdisccarmean = NaN(numel(discdepth),size(carrierB,2));
