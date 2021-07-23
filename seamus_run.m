@@ -24,8 +24,8 @@ function seamus_run(simstart, siminc, simend, btinc, fpcm, realD14C, blankbg, ad
 %   Optional input:
 %   ====================
 %   'calcurve' = 14C calibration curve with which to assign 14C activities to single specimens.
-%                Refers to corresponding .14c file in matlab search path. Default = 'Marine13'
-%                e.g., 'calcurve','Marine13'
+%                Refers to corresponding .14c file in matlab search path. Default = 'Marine20'
+%                e.g., 'calcurve','Marine20'
 %
 %   'speciesA' = Temporal abundance of Species A. n by 2 matrix.
 %                Col 1 = age ka, Col 2 = abundance of total sediment flux, normalised between 0 and 1
@@ -104,7 +104,7 @@ defaultoffsetB =       [ 0    0
 	100  0 ];
 defaultcarrierA = [];
 defaultcarrierB = [];
-defaultcalcurve = 'Marine13';
+defaultcalcurve = 'Marine20';
 defaultdo32bit = 0;
 
 addParameter(p,'speciesA',defaultspeciesA,@isnumeric);
@@ -199,7 +199,7 @@ for i = 1:length(simsteps)
 		types(stinds(i) : stinds(i)+round(fspecA(i)*nforams(i))-1) = 0;
 	end
 	if fspecB(i) > 0
-		types(stinds(i)+round(fspecA(i)*nforams(i))  :  stinds(i)+round(fspecA(i)*nforams) + round(fspecB(i)*nforams(i))-1 ) = 1;
+		types(stinds(i)+round(fspecA(i)*nforams(i))  :  stinds(i)+round(fspecA(i)*nforams(i)) + round(fspecB(i)*nforams(i))-1 ) = 1;
 	end
 end
 
